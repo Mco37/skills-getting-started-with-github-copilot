@@ -1,0 +1,16 @@
+{
+  "passed": 2,
+  "failed": 0,
+  "results": [
+    {
+      "test": "get_activities",
+      "ok": true,
+      "message": "get_activities passed"
+    },
+    {
+      "test": "signup_and_unregister_cycle",
+      "ok": true,
+      "message": "signup_and_unregister_cycle passed"
+    }
+  ]
+}
