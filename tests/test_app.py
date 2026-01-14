@@ -28,3 +28,25 @@ def test_signup_and_unregister_cycle():
     resp = client.post(f"/activities/{activity}/unregister?email={email}")
     assert resp.status_code == 200
     assert email not in activities[activity]["participants"]
+
+
+def test_signup_capacity_limit():
+    """Test that signup is rejected when activity reaches max capacity"""
+    activity = "Chess Club"
+    # Save original participants
+    original_participants = activities[activity]["participants"].copy()
+    max_capacity = activities[activity]["max_participants"]
+    
+    try:
+        # Fill activity to max capacity
+        activities[activity]["participants"] = [f"student{i}@mergington.edu" for i in range(max_capacity)]
+        
+        # Try to add one more participant
+        resp = client.post(f"/activities/{activity}/signup?email=overflow@example.com")
+        assert resp.status_code == 400
+        assert "maximum capacity" in resp.json()["detail"].lower()
+    finally:
+        # Restore original participants
+        activities[activity]["participants"] = original_participants
+
+
