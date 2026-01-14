@@ -8,13 +8,26 @@ for extracurricular activities at Mergington High School.
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
+from pydantic import BaseModel, EmailStr, field_validator
 import os
 from pathlib import Path
+import re
 
 app = FastAPI(
     title="Mergington High School API",
     description="API for viewing and signing up for extracurricular activities"
 )
+
+# Pydantic models for request validation
+class StudentEmail(BaseModel):
+    email: EmailStr
+    
+    @field_validator('email')
+    @classmethod
+    def validate_email_domain(cls, v: str) -> str:
+        if not v.endswith('@mergington.edu'):
+            raise ValueError('Email must be from @mergington.edu domain')
+        return v
 
 # Mount the static files directory
 current_dir = Path(__file__).parent
@@ -87,23 +100,30 @@ def get_activities():
     return activities
 
 @app.post("/activities/{activity_name}/signup")
-def signup_for_activity(activity_name: str, email: str):
+def signup_for_activity(activity_name: str, student: StudentEmail):
     """Sign up a student for an activity"""
     if activity_name not in activities:
         raise HTTPException(status_code=404, detail="Activity not found")
     activity = activities[activity_name]
-    if email in activity["participants"]:
+    
+    # Check if already signed up
+    if student.email in activity["participants"]:
         raise HTTPException(status_code=400, detail="Student already signed up for this activity")
-    activity["participants"].append(email)
-    return {"message": f"Signed up {email} for {activity_name}"}
+    
+    # Check capacity
+    if len(activity["participants"]) >= activity["max_participants"]:
+        raise HTTPException(status_code=400, detail="Activity is at maximum capacity")
+    
+    activity["participants"].append(student.email)
+    return {"message": f"Signed up {student.email} for {activity_name}"}
 
 @app.post("/activities/{activity_name}/unregister")
-def unregister_from_activity(activity_name: str, email: str):
+def unregister_from_activity(activity_name: str, student: StudentEmail):
     """Unregister a student from an activity"""
     if activity_name not in activities:
         raise HTTPException(status_code=404, detail="Activity not found")
     activity = activities[activity_name]
-    if email not in activity["participants"]:
+    if student.email not in activity["participants"]:
         raise HTTPException(status_code=400, detail="Student not registered for this activity")
-    activity["participants"].remove(email)
-    return {"message": f"Unregistered {email} from {activity_name}"}
+    activity["participants"].remove(student.email)
+    return {"message": f"Unregistered {student.email} from {activity_name}"}
