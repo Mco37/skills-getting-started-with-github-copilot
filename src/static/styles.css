@@ -175,11 +175,25 @@ footer {
 
 .delete-participant {
   margin-left: 12px;
+  background-color: transparent;
+  border: none;
+  padding: 4px 8px;
   color: #c62828;
   font-size: 18px;
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.delete-participant:hover {
+  background-color: #ffebee;
+  transform: scale(1.1);
+}
+
+.delete-participant:focus {
+  outline: 2px solid #c62828;
+  outline-offset: 2px;
 }
 
 .participants-section.empty {
