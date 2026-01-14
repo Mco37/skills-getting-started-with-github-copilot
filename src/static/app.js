@@ -20,17 +20,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const spotsLeft = details.max_participants - details.participants.length;
 
-        // Générer la liste des participants avec icône de suppression
+        // Generate participants list with delete icon
         let participantsHTML = "";
         if (details.participants.length > 0) {
           participantsHTML = `
             <div class="participants-section">
-              <strong>Participants inscrits :</strong>
+              <strong>Registered Participants:</strong>
               <ul class="participants-list">
                 ${details.participants.map(p => `
                   <li style="list-style: none; display: flex; align-items: center;">
                     <span>${p}</span>
-                    <span class="delete-participant" title="Supprimer" data-activity="${name}" data-email="${p}" style="cursor:pointer; margin-left:8px; color:#c62828; font-size:18px;">&#128465;</span>
+                    <span class="delete-participant" title="Delete" data-activity="${name}" data-email="${p}" style="cursor:pointer; margin-left:8px; color:#c62828; font-size:18px;">&#128465;</span>
                   </li>
                 `).join("")}
               </ul>
@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
           participantsHTML = `
             <div class="participants-section empty">
-              <em>Aucun participant inscrit pour le moment.</em>
+              <em>No participants registered yet.</em>
             </div>
           `;
         }
@@ -54,12 +54,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         activitiesList.appendChild(activityCard);
 
-        // Ajout des listeners pour la suppression des participants
+        // Add listeners for participant deletion
         activityCard.querySelectorAll('.delete-participant').forEach(icon => {
           icon.addEventListener('click', async (e) => {
             const activityName = icon.getAttribute('data-activity');
             const email = icon.getAttribute('data-email');
-            if (confirm(`Supprimer ${email} de l'activité ${activityName} ?`)) {
+            if (confirm(`Remove ${email} from activity ${activityName}?`)) {
               try {
                 const response = await fetch(`/activities/${encodeURIComponent(activityName)}/unregister?email=${encodeURIComponent(email)}`, {
                   method: 'POST',
@@ -68,10 +68,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (response.ok) {
                   fetchActivities();
                 } else {
-                  alert(result.detail || 'Erreur lors de la suppression');
+                  alert(result.detail || 'Error during deletion');
                 }
               } catch (err) {
-                alert('Erreur réseau lors de la suppression');
+                alert('Network error during deletion');
               }
             }
           });
@@ -110,7 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.textContent = result.message;
         messageDiv.className = "success";
         signupForm.reset();
-        fetchActivities(); // Actualise la liste après inscription
+        fetchActivities(); // Refresh the list after registration
       } else {
         messageDiv.textContent = result.detail || "An error occurred";
         messageDiv.className = "error";
